@@ -1,37 +1,28 @@
 import pytest
-from utils import password_generator
+from utils import password_generator, username_generator
 
 from selenium import webdriver
 
 
 @pytest.fixture
 def driver():
-    return webdriver.Chrome()
+    _driver = webdriver.Chrome()
+    yield _driver
+    _driver.quit()
 
 
-@pytest.fixture
-def name():
-    return "Анастасия"
-
-
-@pytest.fixture
-def username(scope="session"):
-    # username = "kldfjgkldfg"
-    username = "didimadloba"
-    number = str('147')  # have to change this number for registration test
+@pytest.fixture(scope="session")
+def email():
+    base_name = "didimadloba"
     mail = "@mail.ge"
-    return (username + number + mail)
+    return (username_generator(base_name) + mail)
 
 
-# @pytest.fixture
-# def password(scope="session"):
-#     return password_generator(8)
-
-@pytest.fixture
-def password(scope="session"):
-    return 'madloba123'
+@pytest.fixture(scope="session")
+def password():
+    return password_generator(8)
 
 
 @pytest.fixture
-def password_short(scope="session"):
+def password_short():
     return password_generator(3)

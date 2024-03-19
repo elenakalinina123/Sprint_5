@@ -6,48 +6,53 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 class TestLoginPage:
-    ALL_INPUTS = (By.XPATH, ".//div/input")
+    EMAIL_INPUT = (
+        By.XPATH, ".//div/label[text()='Email']/following-sibling::input")
+    PASSWORD_INPUT = (By.XPATH, ".//div/input[@type='password']")
 
     LOGIN_PAGE = (
         By.XPATH, ".//main/div/form/button[contains(text(), 'Войти')]")
-    LOGIN_PAGE_BUTTON = (By.CLASS_NAME, "Auth_link__1fOlj")
     LOGOUT_BUTTON = (By.XPATH, ".//nav/ul/li/button")
     H2_LOCATOR_LOGIN_PAGE = (By.XPATH, ".//main/div/h2")
-    LARGE_BLUE_BUTTON = (By.CLASS_NAME, "button_button_size_large__G21Vg")
+    LOGIN_PAGE_BUTTON = (
+        By.XPATH, ".//button[contains(text(), 'Войти в аккаунт')]")
     PROFILE_PAGE_BUTTON = (By.XPATH, ".//header/nav/a/p")
-    FORM_BUTTON = (By.CSS_SELECTOR, "form button")
+    FORM_BUTTON = (By.XPATH, ".//form/button")
     H1_LOCATOR = (By.XPATH, ".//main/section/h1")
     CONSTRUCTOR_LOCATOR = (By.XPATH, ".//li/a/p[text()='Конструктор']")
 
+    NEW_ORDER_BUTTON = (By.XPATH, ".//button[text()='Оформить заказ']")
+
+    LOGIN_FROM_REGISTER = (By.XPATH, ".//a[contains(text(), 'Войти')]")
+
     BASE_LINK = 'https://stellarburgers.nomoreparties.site/'
 
-    def test_login_from_main_page(self, driver, username, password):
+    def test_login_from_main_page(self, driver, email, password):
         driver.get(self.BASE_LINK)
 
         login_page_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable(self.LARGE_BLUE_BUTTON))
+            EC.element_to_be_clickable(self.LOGIN_PAGE_BUTTON))
 
         login_page_button.click()
+
+        email_field = driver.find_element(*self.EMAIL_INPUT)
+        password_field = driver.find_element(*self.PASSWORD_INPUT)
+
+        email_field.send_keys(email)
+        password_field.send_keys(password)
 
         login_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable(self.FORM_BUTTON))
 
-        username_field, password_field = driver.find_elements(*self.ALL_INPUTS)
-
-        username_field.send_keys(username)
-        password_field.send_keys(password)
-
         login_button.click()
 
         button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable(self.LARGE_BLUE_BUTTON))
+            EC.element_to_be_clickable(self.NEW_ORDER_BUTTON))
 
         assert button.text == "Оформить заказ"
         assert button.is_displayed()
 
-        driver.quit()
-
-    def test_login_from_profile(self, driver, username, password):
+    def test_login_from_profile(self, driver, email, password):
         driver.get(self.BASE_LINK)
 
         profile_page_button = WebDriverWait(driver, 5).until(
@@ -59,58 +64,57 @@ class TestLoginPage:
         login_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable(self.FORM_BUTTON))
 
-        username_field, password_field = driver.find_elements(*self.ALL_INPUTS)
+        email_field = driver.find_element(*self.EMAIL_INPUT)
+        password_field = driver.find_element(*self.PASSWORD_INPUT)
 
-        username_field.send_keys(username)
+        email_field.send_keys(email)
         password_field.send_keys(password)
 
         login_button.click()
 
         button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable(self.LARGE_BLUE_BUTTON))
+            EC.element_to_be_clickable(self.NEW_ORDER_BUTTON))
 
         assert button.text == "Оформить заказ"
         assert button.is_displayed()
 
-        driver.quit()
-
     @pytest.mark.parametrize("link", ['register', 'forgot-password'])
     def test_login_from_registration_form(self, link, driver,
-                                          username, password):
+                                          email, password):
         driver.get(self.BASE_LINK + link)
 
         login_page_button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable(self.LOGIN_PAGE_BUTTON))
+            EC.element_to_be_clickable(self.LOGIN_FROM_REGISTER))
 
         login_page_button.click()
 
         login_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable(self.FORM_BUTTON))
 
-        username_field, password_field = driver.find_elements(*self.ALL_INPUTS)
+        email_field = driver.find_element(*self.EMAIL_INPUT)
+        password_field = driver.find_element(*self.PASSWORD_INPUT)
 
-        username_field.send_keys(username)
+        email_field.send_keys(email)
         password_field.send_keys(password)
 
         login_button.click()
 
         button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable(self.LARGE_BLUE_BUTTON))
+            EC.element_to_be_clickable(self.NEW_ORDER_BUTTON))
 
         assert button.text == "Оформить заказ"
         assert button.is_displayed()
 
-        driver.quit()
-
-    def test_profile_page(self, driver, username, password):
+    def test_profile_page(self, driver, email, password):
         driver.get(self.BASE_LINK + 'login')
 
         login_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable(self.LOGIN_PAGE))
 
-        username_field, password_field = driver.find_elements(*self.ALL_INPUTS)
+        email_field = driver.find_element(*self.EMAIL_INPUT)
+        password_field = driver.find_element(*self.PASSWORD_INPUT)
 
-        username_field.send_keys(username)
+        email_field.send_keys(email)
         password_field.send_keys(password)
 
         login_button.click()
@@ -126,17 +130,16 @@ class TestLoginPage:
 
         assert button.is_displayed() is True
 
-        driver.quit()
-
-    def test_profile_to_constructor(self, driver, username, password):
+    def test_profile_to_constructor(self, driver, email, password):
         driver.get(self.BASE_LINK + 'login')
 
         login_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable(self.LOGIN_PAGE))
 
-        username_field, password_field = driver.find_elements(*self.ALL_INPUTS)
+        email_field = driver.find_element(*self.EMAIL_INPUT)
+        password_field = driver.find_element(*self.PASSWORD_INPUT)
 
-        username_field.send_keys(username)
+        email_field.send_keys(email)
         password_field.send_keys(password)
 
         login_button.click()
@@ -156,17 +159,16 @@ class TestLoginPage:
         assert WebDriverWait(driver, 5).until(EC.visibility_of_element_located(
             self.H1_LOCATOR)).text == "Соберите бургер"
 
-        driver.quit()
-
-    def test_logout(self, driver, username, password):
+    def test_logout(self, driver, email, password):
         driver.get(self.BASE_LINK + 'login')
 
         login_button = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable(self.LOGIN_PAGE))
 
-        username_field, password_field = driver.find_elements(*self.ALL_INPUTS)
+        email_field = driver.find_element(*self.EMAIL_INPUT)
+        password_field = driver.find_element(*self.PASSWORD_INPUT)
 
-        username_field.send_keys(username)
+        email_field.send_keys(email)
         password_field.send_keys(password)
 
         login_button.click()
@@ -182,5 +184,3 @@ class TestLoginPage:
 
         assert WebDriverWait(driver, 5).until(EC.visibility_of_element_located(
             self.H2_LOCATOR_LOGIN_PAGE)).text == "Вход"
-
-        driver.quit()
